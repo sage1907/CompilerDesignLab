@@ -1,0 +1,54 @@
+#include <stdio.h>
+#define MAX_SIZE 100
+
+int main() {
+    // Variable declarations
+    int count = 0;
+    float pi = 3.14159;
+    char letter = 'A';
+    
+    // Array declaration
+    int numbers[MAX_SIZE];
+
+    // Loop constructs
+    for (int i = 0; i < 10; i++) {
+        if (i % 2 == 0) {
+            count += i;
+        } else {
+            count -= i;
+        }
+    }
+
+    // While loop and compound assignment
+    while (count > 0) {
+        count *= 2;
+        count /= 3;
+    }
+
+    // Bitwise operations
+    int a = 5 & 3;
+    int b = 5 | 3;
+    int c = 5 ^ 3;
+    int d = ~5;
+    int e = 5 << 1;
+    int f = 5 >> 1;
+
+    // Logical operations
+    if (a && b || !c) {
+        printf("Logical operation result\n");
+    }
+
+    // Function call with multiple arguments
+    int result = sum(a, b, c);
+
+    // Pointer declaration and usage
+    int *ptr = &result;
+    *ptr = 42;
+
+    return 0;
+}
+
+// Function definition
+int sum(int x, int y, int z) {
+    return x + y + z;
+}

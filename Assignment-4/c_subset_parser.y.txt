@@ -1,0 +1,153 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+extern int yylex();
+extern int yyparse();
+extern FILE* yyin;
+extern int yylineno;
+
+void yyerror(const char* s);
+%}
+
+%union {
+    char* sval;
+}
+
+%token <sval> IDENTIFIER INTEGER_LITERAL
+%token INT VOID IF ELSE WHILE RETURN
+%token SEMICOLON COMMA LPAREN RPAREN LBRACE RBRACE
+%token ASSIGN PLUS MINUS MULTIPLY DIVIDE
+%token EQUAL NOT_EQUAL LESS LESS_EQUAL GREATER GREATER_EQUAL
+
+%left PLUS MINUS
+%left MULTIPLY DIVIDE
+
+%start program
+
+%%
+
+program
+    : function_definition
+    | program function_definition
+    ;
+
+function_definition
+    : type_specifier IDENTIFIER LPAREN parameter_list RPAREN compound_statement
+    ;
+
+type_specifier
+    : INT
+    | VOID
+    ;
+
+parameter_list
+    : parameter_declaration
+    | parameter_list COMMA parameter_declaration
+    |
+    ;
+
+parameter_declaration
+    : type_specifier IDENTIFIER
+    ;
+
+compound_statement
+    : LBRACE statement_list RBRACE
+    ;
+
+statement_list
+    : statement
+    | statement_list statement
+    ;
+
+statement
+    : declaration_statement
+    | assignment_statement
+    | conditional_statement
+    | iterative_statement
+    | return_statement
+    | function_call_statement
+    | compound_statement
+    ;
+
+declaration_statement
+    : type_specifier IDENTIFIER SEMICOLON
+    ;
+
+assignment_statement
+    : IDENTIFIER ASSIGN expression SEMICOLON
+    ;
+
+conditional_statement
+    : IF LPAREN expression RPAREN statement
+    | IF LPAREN expression RPAREN statement ELSE statement
+    ;
+
+iterative_statement
+    : WHILE LPAREN expression RPAREN statement
+    ;
+
+return_statement
+    : RETURN expression SEMICOLON
+    | RETURN SEMICOLON
+    ;
+
+function_call_statement
+    : IDENTIFIER LPAREN argument_list RPAREN SEMICOLON
+    ;
+
+argument_list
+    : expression
+    | argument_list COMMA expression
+    |
+    ;
+
+expression
+    : IDENTIFIER
+    | INTEGER_LITERAL
+    | expression PLUS expression
+    | expression MINUS expression
+    | expression MULTIPLY expression
+    | expression DIVIDE expression
+    | expression EQUAL expression
+    | expression NOT_EQUAL expression
+    | expression LESS expression
+    | expression LESS_EQUAL expression
+    | expression GREATER expression
+    | expression GREATER_EQUAL expression
+    | LPAREN expression RPAREN
+    | IDENTIFIER LPAREN argument_list RPAREN
+    ;
+
+%%
+
+void yyerror(const char* s) {
+    fprintf(stderr, "Error on line %d: %s\n", yylineno, s);
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
+        return 1;
+    }
+
+    FILE* input_file = fopen(argv[1], "r");
+    if (!input_file) {
+        perror("Error opening input file");
+        return 1;
+    }
+
+    yyin = input_file;
+    int parse_result = yyparse();
+
+    fclose(input_file);
+
+    if (parse_result == 0) {
+        printf("Parsing completed successfully.\n");
+    } else {
+        printf("Parsing failed.\n");
+    }
+
+    return parse_result;
+}
